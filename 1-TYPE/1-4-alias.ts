@@ -51,4 +51,7 @@
   type Name = 'name';
   let seolminName: Name;
   seolminName = 'name';
+
+  type Boal = true;
+  const isCat: Boal = true;
 }

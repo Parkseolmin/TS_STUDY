@@ -1,37 +1,28 @@
 {
   type CoffeeCup = {
     shots: number;
-    hasMilk: boolean;
+    hasMilk?: boolean;
+    hasSugar?: boolean;
   };
 
   interface CoffeeMaker {
     makeCoffee(shots: number): CoffeeCup;
   }
 
-  interface CommercialCoffeeMaker {
-    makeCoffee(shots: number): CoffeeCup;
-    fillCoffee(beans: number): void;
-    clean(): void;
-  }
-
-  class CoffeeMachine implements CoffeeMaker, CommercialCoffeeMaker {
-    private static BEANS_GRAMM_PER_SHOT: number = 7;
+  class CoffeeMachine implements CoffeeMaker {
+    private static BEANS_GRAM_PER_SHOT: number = 7;
     private coffeeBeans: number = 0;
 
-    private constructor(coffeeBeans: number) {
+    constructor(coffeeBeans: number, private milk: MilkFrother) {
       this.coffeeBeans = coffeeBeans;
-    }
-
-    static makeMachine(coffeeBeans: number): CoffeeMachine {
-      return new CoffeeMachine(coffeeBeans);
     }
 
     private grindBeans(shots: number) {
       console.log(`${shots}개의 커피콩을 그라인딩 중`);
-      if (this.coffeeBeans < shots * CoffeeMachine.BEANS_GRAMM_PER_SHOT) {
+      if (this.coffeeBeans < shots * CoffeeMachine.BEANS_GRAM_PER_SHOT) {
         throw new Error('Not enough coffee beans!');
       }
-      this.coffeeBeans -= shots * CoffeeMachine.BEANS_GRAMM_PER_SHOT;
+      this.coffeeBeans -= shots * CoffeeMachine.BEANS_GRAM_PER_SHOT;
     }
 
     private preheat(): void {
@@ -46,36 +37,69 @@
       };
     }
 
-    clean() {
-      console.log('커피머신을 청소하는 중...🫧');
-    }
-
-    // 커피머신에 커피콩을 채우는 함수
-    fillCoffee(beans: number) {
-      if (beans < 0) {
-        throw new Error('value for beans must be greater than 0');
-      }
-      this.coffeeBeans += beans;
-      console.log(`${beans}개의 커피콩을 채웠습니다!`);
-    }
-
-    // 커피 만들어 주는 함수
+    // 샷을 내리는 메서드
     makeCoffee(shots: number): CoffeeCup {
       this.grindBeans(shots);
       this.preheat();
-      return this.extract(shots);
+      const coffee = this.extract(shots);
+      return this.milk.makeMilk(coffee);
+    }
+
+    // 커피콩 채우는 메서드
+    fillCoffeeBeans(beans: number) {
+      if (beans < 0) {
+        throw new Error('value must be greater than 0');
+      }
+      this.coffeeBeans += beans;
+    }
+
+    // 커피머신 청소하는 메서드
+    clean() {
+      console.log('머신을 청소하는 중...🫧');
     }
   }
 
-  const maker: CommercialCoffeeMaker = CoffeeMachine.makeMachine(32);
-  maker.makeCoffee(2);
-  maker.fillCoffee(14);
-  maker.clean();
-  console.log(maker);
+  interface MilkFrother {
+    makeMilk(cup: CoffeeCup): CoffeeCup;
+  }
 
-  console.log('------------------------------------');
+  // 싸구려 우유 거품기
+  class CheapMilkSteamer implements MilkFrother {
+    private steamMilk(): void {
+      console.log('Steaming some milk...🥛');
+    }
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      this.steamMilk();
+      return {
+        ...cup,
+        hasMilk: true,
+      };
+    }
+  }
 
-  const maker2: CoffeeMaker = CoffeeMachine.makeMachine(14);
-  maker2.makeCoffee(2);
-  console.log(maker2);
+  // 좋은 우유 거품기
+  class FancyMilkSteamer implements MilkFrother {
+    private steamMilk(): void {
+      console.log('Fancy Steaming some milk...🥛');
+    }
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      this.steamMilk();
+      return {
+        ...cup,
+        hasMilk: true,
+      };
+    }
+  }
+
+  interface SugarProvider {
+    addSugar(cup: CoffeeCup): CoffeeCup;
+  }
+
+  const cheapMilkMaker = new CheapMilkSteamer();
+  const fancyMilkSteamer = new FancyMilkSteamer();
+
+  const sweetCandyMachine = new CoffeeMachine(7, cheapMilkMaker);
+  const sweetMachine = new CoffeeMachine(12, fancyMilkSteamer);
+
+  console.log(sweetCandyMachine.makeCoffee(1));
 }

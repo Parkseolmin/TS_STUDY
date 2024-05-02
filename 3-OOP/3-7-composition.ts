@@ -198,7 +198,7 @@
   );
 
   console.log(sweetCandyMachine);
-  console.log(sweetMachine);
+  console.log(sweetMachine.makeCoffee(1));
   console.log(latteMachine);
   console.log(coldLatteMachine);
   console.log(sweetCoffeeLatteeMachine);

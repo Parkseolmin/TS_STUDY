@@ -14,8 +14,10 @@
       return this.rightValue;
     }
   }
-  const either: Either<number, number> = new SimpleEither(4, 5);
+  const either = new SimpleEither(4, 5);
   either.left();
   either.right();
-  const best = new SimpleEither({ name: 'seolmin' }, 'hello');
+  const best = new SimpleEither({ name: 'seolmin' }, 123);
+  best.left();
+  best.right();
 }

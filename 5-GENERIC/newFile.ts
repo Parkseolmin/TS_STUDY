@@ -22,14 +22,8 @@
   //   employee.pay();
   //   return employee;
   // }
-
-  // 세부적인 타입을 인자로 받아서 추상적인 타입으로 다시 리턴하는 함수는 똥임
-  // function pay(employee: Employee): Employee {
-  //   employee.pay();
-  //   return employee;
-  // }
-
-  function pay<T extends Employee>(employee: T): T {
+  //
+  function pay(employee: Employee): Employee {
     employee.pay();
     return employee;
   }
@@ -41,20 +35,4 @@
 
   const seolminAfterPay = pay(seolmin);
   const bobAfterPay = pay(bob);
-
-  const obj = {
-    name: 'seolmin',
-    age: 20,
-  };
-  const obj2 = {
-    animal: '강아지',
-  };
-
-  console.log(getValue(obj, 'name'));
-  console.log(getValue(obj, 'age'));
-  console.log(getValue(obj2, 'animal'));
-
-  function getValue<T, K extends keyof T>(obj: T, key: K): T[K] {
-    return obj[key];
-  }
 }

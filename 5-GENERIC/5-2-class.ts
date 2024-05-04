@@ -1,8 +1,8 @@
 {
   // ethier : a or b
   interface Either<L, R> {
-    left: () => L;
-    right: () => R;
+    left(): L;
+    right(): R;
   }
 
   class SimpleEither<L, R> implements Either<L, R> {

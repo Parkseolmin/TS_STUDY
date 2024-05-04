@@ -1,27 +1,27 @@
 {
-  function checkNotNullBad(arg: number | null): number {
-    if (arg === null) {
+  function checkNotNullBad(value: number | null): number {
+    if (value === null) {
       throw new Error('not valid number!');
     }
-    return arg;
+    return value;
   }
   const result1 = checkNotNullBad(2);
 
-  function checkNotNullAnyBad(arg: any | null): any {
-    if (arg === null) {
+  function checkNotNullAnyBad(value: any | null): any {
+    if (value === null) {
       throw new Error('not valid number!');
     }
-    return arg;
+    return value;
   }
   const result2 = checkNotNullAnyBad(3);
 
-  function checkNotNull<T>(arg: T | null): T {
-    if (arg === null) {
+  function checkNotNull<T>(value: T | null): T {
+    if (value === null) {
       throw new Error('not valid number!');
     }
-    return arg;
+    return value;
   }
 
-  const result3 = checkNotNull(2);
-  const result4 = checkNotNull(true);
+  const result3: number = checkNotNull(2);
+  const result4: boolean = checkNotNull(true);
 }

@@ -9,79 +9,6 @@
     makeCoffee(shots: number): CoffeeCup;
   }
 
-  class CoffeeMachine implements CoffeeMaker {
-    private static BEANS_GRAMM_PER_SHOT: number = 7; // class level
-    private coffeeBeans: number = 0; // instance (object) level
-
-    constructor(
-      coffeeBeans: number,
-      private milk: MilkFrother,
-      private sugar: SugarProvider
-    ) {
-      this.coffeeBeans = coffeeBeans;
-    }
-
-    /**
-     * 커피콩을 갈아주는 메서드
-     * @param shots 그라인딩 할 커피콩
-     */
-    private grindBeans(shots: number) {
-      console.log(`${shots}개의 커피콩을 그라인딩 중`);
-      if (this.coffeeBeans < shots * CoffeeMachine.BEANS_GRAMM_PER_SHOT) {
-        throw new Error('Not enough coffee beans!');
-      }
-      this.coffeeBeans -= shots * CoffeeMachine.BEANS_GRAMM_PER_SHOT;
-    }
-
-    /**
-     * 데워주는 메서드
-     */
-    private preheat(): void {
-      console.log('따뜻하게 데우는 중...🔥');
-    }
-
-    /**
-     * 샷을 추출하는 메서드
-     * @param shots 추출할 샷
-     * @returns shot : 추출할 샷, hasMilk:우유 여부
-     */
-    private extract(shots: number): CoffeeCup {
-      console.log(`${shots}샷의 커피를 추출하는 중...☕`);
-      return {
-        shots,
-        hasMilk: false,
-      };
-    }
-
-    /**
-     * 커피를 만들어 주는 함수
-     */
-    makeCoffee(shots: number): CoffeeCup {
-      this.grindBeans(shots);
-      this.preheat();
-      const coffee = this.extract(shots);
-      const sugarAdded = this.sugar.addSugar(coffee);
-      return this.milk.makeMilk(sugarAdded);
-    }
-
-    /**
-     * 커피머신의 커피콩을 채우는 함수
-     */
-    fillCoffeeBeans(beans: number) {
-      if (beans < 0) {
-        throw new Error('value for beans must be greater than 0');
-      }
-      this.coffeeBeans += beans;
-    }
-
-    clean() {
-      console.log('커피머신을 청소하는 중...🫧');
-    }
-  }
-
-  // ------------------------------------------------
-  // 상속하기 위해서 construction을 public이나 protected로 되어있어야함
-
   interface MilkFrother {
     makeMilk(cup: CoffeeCup): CoffeeCup;
   }
@@ -90,44 +17,45 @@
     addSugar(cup: CoffeeCup): CoffeeCup;
   }
 
-  // 싸구려 우유 거품기
+  // 우유
   class CheapMilkSteamer implements MilkFrother {
-    private steamMilk(): void {
-      console.log('Steaming some milk...🥛');
+    private steamMilk(): boolean {
+      console.log('우유를 스팀하는 중...');
+      return true;
     }
     makeMilk(cup: CoffeeCup): CoffeeCup {
-      this.steamMilk();
+      const milk = this.steamMilk();
       return {
         ...cup,
-        hasMilk: true,
+        hasMilk: milk,
       };
     }
   }
 
-  // 좋은 우유 거품기
   class FancyMilkSteamer implements MilkFrother {
-    private steamMilk(): void {
-      console.log('Fancy Steaming some milk...🥛');
+    private steamMilk(): boolean {
+      console.log('Fancy한 우유를 스팀하는 중...');
+      return true;
     }
     makeMilk(cup: CoffeeCup): CoffeeCup {
-      this.steamMilk();
+      const milk = this.steamMilk();
       return {
         ...cup,
-        hasMilk: true,
+        hasMilk: milk,
       };
     }
   }
 
-  // 최고급 우유 거품기
   class ColdMilkSteamer implements MilkFrother {
-    private steamMilk(): void {
-      console.log('Fancy Steaming some milk...🥛');
+    private steamMilk(): boolean {
+      console.log('Cold한 우유를 스팀하는 중...');
+      return true;
     }
     makeMilk(cup: CoffeeCup): CoffeeCup {
-      this.steamMilk();
+      const milk = this.steamMilk();
       return {
         ...cup,
-        hasMilk: true,
+        hasMilk: milk,
       };
     }
   }
@@ -138,10 +66,10 @@
     }
   }
 
-  // 캔디 설탕 제조기
+  // 설탕
   class CandySugarMixer implements SugarProvider {
-    private getSugar() {
-      console.log('Getting some sugar from jar candy 🍬');
+    private getSugar(): boolean {
+      console.log('캔디설탕으로부터 설탕을 가져오는 중...');
       return true;
     }
     addSugar(cup: CoffeeCup): CoffeeCup {
@@ -153,10 +81,9 @@
     }
   }
 
-  // 좋은 설탕 제조기
   class SugarMixer implements SugarProvider {
-    private getSugar() {
-      console.log('Getting some sugar from jar 🍬');
+    private getSugar(): boolean {
+      console.log('순수설탕으로부터 설탕을 가져오는 중...');
       return true;
     }
     addSugar(cup: CoffeeCup): CoffeeCup {
@@ -174,32 +101,81 @@
     }
   }
 
-  // 우유
-  const cheapMilkMaker = new CheapMilkSteamer();
-  const fancyMilkSteamer = new FancyMilkSteamer();
-  const coldMilkSteamer = new ColdMilkSteamer();
-  const noMilk = new NoMilk();
+  // 머신
+  class CoffeeMachine implements CoffeeMaker {
+    // 하나의 클래스에서 공유할 경우 static
+    // 외부에서 접근할 필요가 없을 경우 private
+    private static BEANS_GRAM_PER_SHOT: number = 7;
+    private coffeeBeans: number = 0;
 
-  // 설탕
+    constructor(
+      coffeeBeans: number,
+      private milk: MilkFrother,
+      private sugar: SugarProvider
+    ) {
+      this.coffeeBeans = coffeeBeans;
+    }
+
+    static makeMachine(
+      coffeeBeans: number,
+      milk: MilkFrother,
+      sugar: SugarProvider
+    ): CoffeeMachine {
+      return new CoffeeMachine(coffeeBeans, milk, sugar);
+    }
+
+    private grindBeans(shots: number) {
+      if (this.coffeeBeans < shots * CoffeeMachine.BEANS_GRAM_PER_SHOT) {
+        throw new Error('Not enough coffee beans!');
+      }
+      this.coffeeBeans -= shots * CoffeeMachine.BEANS_GRAM_PER_SHOT;
+      console.log(`${shots}잔 분량의 커피콩을 그라인딩 중...`);
+    }
+
+    private preheat() {
+      console.log('따뜻하게 데우는 중...');
+    }
+
+    private extract(shots: number): CoffeeCup {
+      console.log(`${shots}개의 샷을 내리는 중`);
+      return {
+        shots,
+        hasMilk: false,
+      };
+    }
+
+    makeCoffee(shots: number): CoffeeCup {
+      this.grindBeans(shots);
+      this.preheat();
+      const coffee = this.extract(shots);
+      const sugarAdded = this.sugar.addSugar(coffee);
+      return this.milk.makeMilk(sugarAdded);
+    }
+
+    // 커피콩 채우는 함수 - 외부에서 접근해도 됨
+    fillCoffeeBeans(coffeeBeans: number) {
+      if (coffeeBeans < 0) {
+        throw new Error('value must be greater than 0');
+      }
+      this.coffeeBeans += coffeeBeans;
+      console.log(`${coffeeBeans}개의 커피콩을 추가로 채웠습니다.`);
+    }
+
+    clean() {
+      console.log('커피 머신을 청소하는 중...');
+    }
+  }
+
+  // 우유 인스턴스
+  const cheapMilkMaker = new CheapMilkSteamer();
+  const fancyMilkMaker = new FancyMilkSteamer();
+  const coldMilkMaker = new ColdMilkSteamer();
+
+  // 설탕 인스턴스
   const candySugar = new CandySugarMixer();
   const sugar = new SugarMixer();
-  const noSugar = new NoSugar();
 
-  // 머신
-  const sweetCandyMachine = new CoffeeMachine(12, noMilk, candySugar);
-  const sweetMachine = new CoffeeMachine(12, noMilk, sugar);
-
-  const latteMachine = new CoffeeMachine(12, cheapMilkMaker, noSugar);
-  const coldLatteMachine = new CoffeeMachine(12, coldMilkSteamer, noSugar);
-  const sweetCoffeeLatteeMachine = new CoffeeMachine(
-    12,
-    cheapMilkMaker,
-    candySugar
-  );
-
-  console.log(sweetCandyMachine);
-  console.log(sweetMachine.makeCoffee(1));
-  console.log(latteMachine);
-  console.log(coldLatteMachine);
-  console.log(sweetCoffeeLatteeMachine);
+  const maker = new CoffeeMachine(14, cheapMilkMaker, sugar);
+  const coffee = maker.makeCoffee(1);
+  console.log(coffee);
 }

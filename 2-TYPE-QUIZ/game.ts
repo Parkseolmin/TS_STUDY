@@ -25,6 +25,9 @@ function move(direction: Direction) {
     case 'right':
       position.x += 1;
       break;
+    default:
+      const invalid: never = direction;
+      throw new Error(`Invalid direction: ${invalid}`);
   }
 }
 
